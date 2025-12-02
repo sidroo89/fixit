@@ -1,0 +1,132 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+pubspec.lock
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# ============================================
+# Firebase Configuration Files (SENSITIVE)
+# These files contain API keys and project IDs
+# Generate your own using: flutterfire configure
+# ============================================
+lib/firebase_options.dart
+
+# Android Firebase config
+android/app/google-services.json
+
+# iOS Firebase config
+ios/Runner/GoogleService-Info.plist
+ios/firebase_app_id_file.json
+
+# macOS Firebase config
+macos/Runner/GoogleService-Info.plist
+macos/firebase_app_id_file.json
+
+# Web Firebase config (if using separate file)
+web/firebase-config.js
+
+# ============================================
+# Environment & Secret Files
+# ============================================
+.env
+.env.*
+*.env
+secrets/
+*.pem
+*.p12
+*.key
+*.keystore
+*.jks
+
+# Local configuration
+local.properties
+
+# ============================================
+# Build & Generated Files
+# ============================================
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Gradle
+.gradle/
+/android/.gradle/
+/android/build/
+/android/app/build/
+/android/captures/
+/android/local.properties
+
+# iOS/macOS
+/ios/Pods/
+/ios/.symlinks/
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Flutter.podspec
+/macos/Pods/
+/macos/.symlinks/
+/macos/Flutter/Flutter.framework
+/macos/Flutter/Flutter.podspec
+*.xcworkspace
+
+# Generated plugin registrants
+/ios/Flutter/GeneratedPluginRegistrant.*
+/macos/Flutter/GeneratedPluginRegistrant.*
+
+# ============================================
+# IDE & Editor
+# ============================================
+.cursor/
+*.code-workspace
+
+# ============================================
+# Testing
+# ============================================
+coverage/
+test-results/
+.test_coverage/
+
+# ============================================
+# Documentation (generated)
+# ============================================
+doc/api/

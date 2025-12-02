@@ -1,0 +1,49 @@
+name: fixit
+description: "FixIt Now - Role-Based Facility Management Application"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Firebase
+  firebase_core: ^3.8.1
+  firebase_auth: ^5.3.4
+  cloud_firestore: ^5.6.0
+  firebase_storage: ^12.4.0
+
+  # State Management
+  provider: ^6.1.2
+
+  # Google Sign-In
+  google_sign_in: ^6.2.2
+
+  # UI/UX
+  google_fonts: ^6.2.1
+  smooth_page_indicator: ^1.2.0+3
+  image_picker: ^1.1.2
+  cached_network_image: ^3.4.1
+
+  # Utilities
+  shared_preferences: ^2.3.4
+  intl: ^0.19.0
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  # Note: Using google_fonts package for Poppins font
+  # No local font files needed
+  
+  assets:
+    - assets/images/
+    - assets/icons/
