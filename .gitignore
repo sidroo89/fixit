@@ -32,8 +32,9 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-/coverage/
-pubspec.lock
+
+# NOTE: pubspec.lock is INCLUDED for apps to ensure consistent dependencies
+# Only ignore for packages/libraries
 
 # Symbolication related
 app.*.symbols
@@ -98,20 +99,23 @@ local.properties
 /android/captures/
 /android/local.properties
 
-# iOS/macOS
+# iOS/macOS - Only ignore generated/user-specific files
 /ios/Pods/
 /ios/.symlinks/
 /ios/Flutter/Flutter.framework
 /ios/Flutter/Flutter.podspec
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/ephemeral/
 /macos/Pods/
 /macos/.symlinks/
 /macos/Flutter/Flutter.framework
 /macos/Flutter/Flutter.podspec
-*.xcworkspace
+/macos/Flutter/GeneratedPluginRegistrant.swift
 
-# Generated plugin registrants
-/ios/Flutter/GeneratedPluginRegistrant.*
-/macos/Flutter/GeneratedPluginRegistrant.*
+# Xcode user-specific data (NOT the workspace itself)
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
 
 # ============================================
 # IDE & Editor
