@@ -32,6 +32,15 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
     }
   }
 
+  Future<void> _navigateToCreateTicket() async {
+    // Navigate and wait for result
+    await Navigator.pushNamed(context, AppRoutes.createTicket);
+    // Re-initialize tickets when returning (in case stream needs refresh)
+    if (mounted) {
+      _initializeTickets();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -136,16 +145,11 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          AppRoutes.navigateTo(context, AppRoutes.createTicket);
-        },
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToCreateTicket,
         backgroundColor: AppColors.primaryTeal,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'New Issue',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
+        elevation: 4,
+        child: const Icon(Icons.add, color: Colors.white, size: 28),
       ),
     );
   }

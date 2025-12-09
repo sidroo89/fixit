@@ -45,7 +45,8 @@ class TicketProvider extends ChangeNotifier {
         notifyListeners();
       },
       onError: (error) {
-        _errorMessage = 'Failed to load tickets';
+        debugPrint('Error loading tickets: $error');
+        _errorMessage = 'Failed to load tickets. Check Firestore indexes.';
         _isLoading = false;
         notifyListeners();
       },
