@@ -3,10 +3,34 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/ticket_provider.dart';
 import '../../../app/routes.dart';
+import '../../widgets/ticket/ticket_card.dart';
 
-class UserHomeScreen extends StatelessWidget {
+class UserHomeScreen extends StatefulWidget {
   const UserHomeScreen({super.key});
+
+  @override
+  State<UserHomeScreen> createState() => _UserHomeScreenState();
+}
+
+class _UserHomeScreenState extends State<UserHomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeTickets();
+    });
+  }
+
+  void _initializeTickets() {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final ticketProvider = Provider.of<TicketProvider>(context, listen: false);
+    
+    if (authProvider.currentUser != null) {
+      ticketProvider.initUserTickets(authProvider.currentUser!.uid);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,192 +45,148 @@ class UserHomeScreen extends StatelessWidget {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _showLogoutDialog(context),
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {
+              AppRoutes.navigateTo(context, AppRoutes.notifications);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            onPressed: () {
+              AppRoutes.navigateTo(context, AppRoutes.profile);
+            },
           ),
         ],
       ),
-      body: Center(
+      body: Column(
+        children: [
+          // Welcome header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+            decoration: const BoxDecoration(
+              color: AppColors.primaryTeal,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Hello, ${user?.name.split(' ').first ?? 'User'}! 👋',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Track your facility requests below',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                ),
+              ],
+            ),
+          ),
+
+          // Tickets list
+          Expanded(
+            child: Consumer<TicketProvider>(
+              builder: (context, ticketProvider, child) {
+                if (ticketProvider.isLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.primaryTeal,
+                    ),
+                  );
+                }
+
+                if (ticketProvider.tickets.isEmpty) {
+                  return _buildEmptyState();
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    _initializeTickets();
+                  },
+                  color: AppColors.primaryTeal,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    itemCount: ticketProvider.tickets.length,
+                    itemBuilder: (context, index) {
+                      final ticket = ticketProvider.tickets[index];
+                      return TicketCard(
+                        ticket: ticket,
+                        onTap: () {
+                          AppRoutes.navigateTo(
+                            context,
+                            AppRoutes.ticketDetails,
+                            arguments: ticket.id,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          AppRoutes.navigateTo(context, AppRoutes.createTicket);
+        },
+        backgroundColor: AppColors.primaryTeal,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text(
+          'New Issue',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // User role indicator
             Container(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: AppColors.primaryTeal.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                Icons.person,
-                size: 80,
+                Icons.inbox_outlined,
+                size: 64,
                 color: AppColors.primaryTeal,
               ),
             ),
             const SizedBox(height: 24),
-
-            // Role text - This is the demo placeholder showing "USER"
             Text(
-              'USER',
-              style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                    color: AppColors.primaryTeal,
+              'No Tickets Yet',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 8),
-
-            // User name
-            if (user != null) ...[
-              Text(
-                'Welcome, ${user.name}!',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      color: AppColors.textPrimary,
-                    ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                user.email,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-              ),
-            ],
-
-            const SizedBox(height: 48),
-
-            // Info card
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 32),
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadowLight,
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+            Text(
+              'Tap the button below to report\nyour first facility issue',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Icon(
-                    Icons.info_outline,
-                    color: AppColors.primaryTeal,
-                    size: 32,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'User Dashboard',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'This is a placeholder screen for the User flow.\nYou can report issues and track your tickets here.',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          height: 1.5,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            // Role badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.primaryTeal,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.verified_user,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Role: ${user?.role.toUpperCase() ?? 'USER'}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
             ),
           ],
         ),
       ),
-      // FAB for creating new ticket (placeholder)
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to create ticket screen
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Create Ticket - Coming in next phase!'),
-              backgroundColor: AppColors.primaryTeal,
-            ),
-          );
-        },
-        backgroundColor: AppColors.primaryTeal,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
     );
-  }
-
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _handleLogout(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
-            child: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _handleLogout(BuildContext context) async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.signOut();
-    
-    if (context.mounted) {
-      AppRoutes.navigateAndClearStack(context, AppRoutes.login);
-    }
   }
 }
-

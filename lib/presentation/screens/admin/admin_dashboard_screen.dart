@@ -3,10 +3,30 @@ import 'package:provider/provider.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../providers/auth_provider.dart';
+import '../../../providers/ticket_provider.dart';
 import '../../../app/routes.dart';
+import '../../widgets/ticket/ticket_card.dart';
 
-class AdminDashboardScreen extends StatelessWidget {
+class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
+
+  @override
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
+}
+
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeTickets();
+    });
+  }
+
+  void _initializeTickets() {
+    final ticketProvider = Provider.of<TicketProvider>(context, listen: false);
+    ticketProvider.initAdminTickets();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,201 +41,164 @@ class AdminDashboardScreen extends StatelessWidget {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
+            icon: const Icon(Icons.notifications_outlined),
             onPressed: () {
-              // TODO: Navigate to settings
+              AppRoutes.navigateTo(context, AppRoutes.notifications);
             },
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _showLogoutDialog(context),
+            icon: const Icon(Icons.person_outline),
+            onPressed: () {
+              AppRoutes.navigateTo(context, AppRoutes.profile);
+            },
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // Orange header section
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-              decoration: const BoxDecoration(
-                color: AppColors.accentOrange,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(32),
-                  bottomRight: Radius.circular(32),
-                ),
-              ),
-              child: Column(
-                children: [
-                  // Admin avatar and info
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.admin_panel_settings,
-                      size: 48,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (user != null) ...[
-                    Text(
-                      user.name,
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      user.email,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
-                          ),
-                    ),
-                  ],
-                ],
+      body: Column(
+        children: [
+          // Stats header
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+            decoration: const BoxDecoration(
+              color: AppColors.accentOrange,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(24),
+                bottomRight: Radius.circular(24),
               ),
             ),
-
-            // Content
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  // Admin role indicator
-                  Container(
-                    padding: const EdgeInsets.all(32),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentOrange.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.shield,
-                      size: 80,
-                      color: AppColors.accentOrange,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Role text - This is the demo placeholder showing "ADMIN"
-                  Text(
-                    'ADMIN',
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                          color: AppColors.accentOrange,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  // Stats row (placeholder)
-                  Row(
-                    children: [
-                      _buildStatCard(
-                        context,
-                        'Open',
-                        '0',
-                        AppColors.statusOpen,
-                        Icons.error_outline,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Welcome, ${user?.name.split(' ').first ?? 'Admin'}! 👑',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
                       ),
-                      const SizedBox(width: 12),
-                      _buildStatCard(
-                        context,
-                        'In Progress',
-                        '0',
-                        AppColors.statusInProgress,
-                        Icons.pending_outlined,
-                      ),
-                      const SizedBox(width: 12),
-                      _buildStatCard(
-                        context,
-                        'Resolved',
-                        '0',
-                        AppColors.statusResolved,
-                        Icons.check_circle_outline,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Info card
-                  Container(
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.shadowLight,
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Column(
+                ),
+                const SizedBox(height: 16),
+                
+                // Stats cards
+                Consumer<TicketProvider>(
+                  builder: (context, ticketProvider, child) {
+                    return Row(
                       children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: AppColors.accentOrange,
-                          size: 32,
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Admin Dashboard',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w600,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'This is a placeholder screen for the Admin flow.\nYou can manage all tickets and update their status here.',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.textSecondary,
-                                height: 1.5,
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Role badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: AppColors.accentOrange,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.verified,
-                          color: Colors.white,
-                          size: 18,
+                        _buildStatCard(
+                          context,
+                          'Open',
+                          ticketProvider.openCount.toString(),
+                          AppColors.statusOpen,
+                          Icons.error_outline,
                         ),
                         const SizedBox(width: 8),
-                        Text(
-                          'Role: ${user?.role.toUpperCase() ?? 'ADMIN'}',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        _buildStatCard(
+                          context,
+                          'In Progress',
+                          ticketProvider.inProgressCount.toString(),
+                          AppColors.statusInProgress,
+                          Icons.pending_outlined,
+                        ),
+                        const SizedBox(width: 8),
+                        _buildStatCard(
+                          context,
+                          'Resolved',
+                          ticketProvider.resolvedCount.toString(),
+                          AppColors.statusResolved,
+                          Icons.check_circle_outline,
                         ),
                       ],
-                    ),
-                  ),
-                ],
-              ),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+
+          // Filter chips
+          Consumer<TicketProvider>(
+            builder: (context, ticketProvider, child) {
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    _buildFilterChip(
+                      'All Tickets',
+                      ticketProvider.currentFilter == 'all',
+                      () => ticketProvider.setFilter('all'),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      'Open',
+                      ticketProvider.currentFilter == 'open',
+                      () => ticketProvider.setFilter('open'),
+                      color: AppColors.statusOpen,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      'In Progress',
+                      ticketProvider.currentFilter == 'in progress',
+                      () => ticketProvider.setFilter('in progress'),
+                      color: AppColors.statusInProgress,
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterChip(
+                      'Resolved',
+                      ticketProvider.currentFilter == 'resolved',
+                      () => ticketProvider.setFilter('resolved'),
+                      color: AppColors.statusResolved,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+
+          // Tickets list
+          Expanded(
+            child: Consumer<TicketProvider>(
+              builder: (context, ticketProvider, child) {
+                if (ticketProvider.isLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.accentOrange,
+                    ),
+                  );
+                }
+
+                if (ticketProvider.tickets.isEmpty) {
+                  return _buildEmptyState();
+                }
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    _initializeTickets();
+                  },
+                  color: AppColors.accentOrange,
+                  child: ListView.builder(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    itemCount: ticketProvider.tickets.length,
+                    itemBuilder: (context, index) {
+                      final ticket = ticketProvider.tickets[index];
+                      return TicketCard(
+                        ticket: ticket,
+                        showReporter: true,
+                        onTap: () {
+                          AppRoutes.navigateTo(
+                            context,
+                            AppRoutes.ticketDetails,
+                            arguments: ticket.id,
+                          );
+                        },
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -229,7 +212,7 @@ class AdminDashboardScreen extends StatelessWidget {
   ) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(16),
@@ -243,8 +226,8 @@ class AdminDashboardScreen extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, color: Colors.white, size: 28),
-            const SizedBox(height: 8),
+            Icon(icon, color: Colors.white, size: 24),
+            const SizedBox(height: 4),
             Text(
               count,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -252,7 +235,6 @@ class AdminDashboardScreen extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
             ),
-            const SizedBox(height: 4),
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -266,48 +248,76 @@ class AdminDashboardScreen extends StatelessWidget {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
+  Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap, {Color? color}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? (color ?? AppColors.accentOrange) : Colors.white,
           borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? (color ?? AppColors.accentOrange) : AppColors.borderLight,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: (color ?? AppColors.accentOrange).withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : AppColors.textPrimary,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _handleLogout(context);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.error,
-            ),
-            child: const Text(
-              'Logout',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Future<void> _handleLogout(BuildContext context) async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    await authProvider.signOut();
-    
-    if (context.mounted) {
-      AppRoutes.navigateAndClearStack(context, AppRoutes.login);
-    }
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppColors.accentOrange.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.check_circle_outline,
+                size: 64,
+                color: AppColors.accentOrange,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'All Clear!',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No tickets match the current filter',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
-

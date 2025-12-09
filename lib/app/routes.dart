@@ -4,7 +4,11 @@ import '../presentation/screens/onboarding/onboarding_screen.dart';
 import '../presentation/screens/auth/login_screen.dart';
 import '../presentation/screens/auth/register_screen.dart';
 import '../presentation/screens/user/user_home_screen.dart';
+import '../presentation/screens/user/create_ticket_screen.dart';
 import '../presentation/screens/admin/admin_dashboard_screen.dart';
+import '../presentation/screens/shared/ticket_details_screen.dart';
+import '../presentation/screens/shared/profile_screen.dart';
+import '../presentation/screens/shared/notifications_screen.dart';
 
 class AppRoutes {
   AppRoutes._();
@@ -42,19 +46,21 @@ class AppRoutes {
       case adminDashboard:
         return _buildRoute(const AdminDashboardScreen(), settings);
 
-      // TODO: Add more routes in future phases
-      // case createTicket:
-      //   return _buildRoute(const CreateTicketScreen(), settings);
-      //
-      // case ticketDetails:
-      //   final ticketId = settings.arguments as String;
-      //   return _buildRoute(TicketDetailsScreen(ticketId: ticketId), settings);
-      //
-      // case profile:
-      //   return _buildRoute(const ProfileScreen(), settings);
-      //
-      // case notifications:
-      //   return _buildRoute(const NotificationsScreen(), settings);
+      case createTicket:
+        return _buildRoute(const CreateTicketScreen(), settings);
+
+      case ticketDetails:
+        final ticketId = settings.arguments as String;
+        return _buildRoute(
+          TicketDetailsScreen(ticketId: ticketId),
+          settings,
+        );
+
+      case profile:
+        return _buildRoute(const ProfileScreen(), settings);
+
+      case notifications:
+        return _buildRoute(const NotificationsScreen(), settings);
 
       default:
         return _buildRoute(
@@ -113,4 +119,3 @@ class AppRoutes {
     Navigator.pop(context);
   }
 }
-
