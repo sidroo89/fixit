@@ -12,7 +12,18 @@ enum AuthState {
 }
 
 class AuthProvider extends ChangeNotifier {
-  final AuthService _authService = AuthService();
+  late final AuthService _authService;
+
+  /// Default constructor - uses real Firebase services
+  AuthProvider() {
+    _authService = AuthService();
+  }
+
+  /// Test constructor - allows injecting mock services
+  @visibleForTesting
+  AuthProvider.forTesting({required AuthService authService}) {
+    _authService = authService;
+  }
 
   AuthState _authState = AuthState.initial;
   User? _firebaseUser;

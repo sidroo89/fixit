@@ -6,8 +6,24 @@ import '../data/services/firestore_service.dart';
 import '../data/services/storage_service.dart';
 
 class TicketProvider extends ChangeNotifier {
-  final FirestoreService _firestoreService = FirestoreService();
-  final StorageService _storageService = StorageService();
+  late final FirestoreService _firestoreService;
+  late final StorageService _storageService;
+
+  /// Default constructor - uses real Firebase services
+  TicketProvider() {
+    _firestoreService = FirestoreService();
+    _storageService = StorageService();
+  }
+
+  /// Test constructor - allows injecting mock services
+  @visibleForTesting
+  TicketProvider.forTesting({
+    required FirestoreService firestoreService,
+    required StorageService storageService,
+  }) {
+    _firestoreService = firestoreService;
+    _storageService = storageService;
+  }
 
   List<TicketModel> _tickets = [];
   List<TicketModel> _filteredTickets = [];
